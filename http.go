@@ -11,7 +11,6 @@ package zapdriver
 // pipe-1&dateRangeUnbound=backwardInTime
 
 import (
-	"bytes"
 	"io"
 	"net/http"
 	"strconv"
@@ -134,9 +133,8 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 		}
 	}
 
-	buf := &bytes.Buffer{}
 	if req.Body != nil {
-		n, _ := io.Copy(buf, req.Body) // nolint: gas
+		n, _ := io.Copy(io.Discard, req.Body) // nolint: gas
 		requestSize += n
 	}
 
@@ -153,8 +151,7 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 	}
 
 	if res.Body != nil {
-		buf.Reset()
-		n, _ := io.Copy(buf, res.Body) // nolint: gas
+		n, _ := io.Copy(io.Discard, res.Body) // nolint: gas
 		responseSize += n
 	}
 
@@ -164,7 +161,7 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaller interface.
-func (req HTTPPayload) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+func (req *HTTPPayload) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("requestMethod", req.RequestMethod)
 	enc.AddString("requestUrl", req.RequestURL)
 	enc.AddInt("status", req.Status)
