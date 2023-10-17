@@ -22,7 +22,7 @@ import (
 // HTTP adds the correct Stackdriver "HTTP" field.
 //
 // see: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#HttpRequest
-func HTTP(req *HTTPPayload) zap.Field {
+func HTTP(req HTTPPayload) zap.Field {
 	return zap.Object("httpRequest", req)
 }
 
@@ -100,7 +100,7 @@ type HTTPPayload struct {
 
 // NewHTTP returns a new HTTPPayload struct, based on the passed
 // in http.Request and http.Response objects.
-func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
+func NewHTTP(req *http.Request, res *http.Response) HTTPPayload {
 	if req == nil {
 		req = &http.Request{}
 	}
@@ -109,7 +109,7 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 		res = &http.Response{}
 	}
 
-	sdreq := &HTTPPayload{
+	sdreq := HTTPPayload{
 		RequestMethod: req.Method,
 		Status:        res.StatusCode,
 		UserAgent:     req.UserAgent(),
@@ -161,7 +161,7 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 }
 
 // MarshalLogObject implements zapcore.ObjectMarshaller interface.
-func (req *HTTPPayload) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+func (req HTTPPayload) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("requestMethod", req.RequestMethod)
 	enc.AddString("requestUrl", req.RequestURL)
 	enc.AddInt("status", req.Status)

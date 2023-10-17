@@ -14,10 +14,20 @@ import (
 	"go.ajitem.com/zapdriver"
 )
 
+func BenchmarkHTTP(b *testing.B) {
+	b.ReportAllocs()
+	b.RunParallel(func(b *testing.PB) {
+		for b.Next() {
+			p := zapdriver.NewHTTP(nil, nil)
+			_ = zapdriver.HTTP(p)
+		}
+	})
+}
+
 func TestHTTP(t *testing.T) {
 	t.Parallel()
 
-	req := &zapdriver.HTTPPayload{}
+	var req zapdriver.HTTPPayload
 	field := zapdriver.HTTP(req)
 
 	assert.Equal(t, zap.Object("httpRequest", req), field)
