@@ -38,7 +38,7 @@ var encoderConfig = zapcore.EncoderConfig{
 	NameKey:        "logger",
 	CallerKey:      "caller",
 	MessageKey:     "message",
-	StacktraceKey:  "stacktrace",
+	StacktraceKey:  "stack_trace",
 	LineEnding:     zapcore.DefaultLineEnding,
 	EncodeLevel:    EncodeLevel,
 	EncodeTime:     RFC3339NanoTimeEncoder,
