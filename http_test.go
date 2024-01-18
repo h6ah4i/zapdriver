@@ -1,7 +1,7 @@
 package zapdriver_test
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -9,16 +9,25 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	"go.uber.org/zap"
 
 	"go.ajitem.com/zapdriver"
 )
 
+func BenchmarkHTTP(b *testing.B) {
+	b.ReportAllocs()
+	b.RunParallel(func(b *testing.PB) {
+		for b.Next() {
+			p := zapdriver.NewHTTP(nil, nil)
+			_ = zapdriver.HTTP(p)
+		}
+	})
+}
+
 func TestHTTP(t *testing.T) {
 	t.Parallel()
 
-	req := &zapdriver.HTTPPayload{}
+	var req zapdriver.HTTPPayload
 	field := zapdriver.HTTP(req)
 
 	assert.Equal(t, zap.Object("httpRequest", req), field)
@@ -81,14 +90,14 @@ func TestNewHTTP(t *testing.T) {
 		},
 
 		"RequestSize": {
-			&http.Request{Body: ioutil.NopCloser(strings.NewReader("12345"))},
+			&http.Request{Body: io.NopCloser(strings.NewReader("12345"))},
 			nil,
 			&zapdriver.HTTPPayload{RequestSize: "5", ResponseSize: "0"},
 		},
 
 		"ResponseSize": {
 			nil,
-			&http.Response{Body: ioutil.NopCloser(strings.NewReader("12345"))},
+			&http.Response{Body: io.NopCloser(strings.NewReader("12345"))},
 			&zapdriver.HTTPPayload{ResponseSize: "5", RequestSize: "0"},
 		},
 
@@ -108,7 +117,7 @@ func TestNewHTTP(t *testing.T) {
 
 		"simple response": {
 			nil,
-			&http.Response{Body: ioutil.NopCloser(strings.NewReader("12345")), StatusCode: 404},
+			&http.Response{Body: io.NopCloser(strings.NewReader("12345")), StatusCode: 404},
 			&zapdriver.HTTPPayload{RequestSize: "0", ResponseSize: "5", Status: 404},
 		},
 

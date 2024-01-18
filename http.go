@@ -11,7 +11,6 @@ package zapdriver
 // pipe-1&dateRangeUnbound=backwardInTime
 
 import (
-	"bytes"
 	"io"
 	"net/http"
 	"strconv"
@@ -23,7 +22,7 @@ import (
 // HTTP adds the correct Stackdriver "HTTP" field.
 //
 // see: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#HttpRequest
-func HTTP(req *HTTPPayload) zap.Field {
+func HTTP(req HTTPPayload) zap.Field {
 	return zap.Object("httpRequest", req)
 }
 
@@ -101,7 +100,7 @@ type HTTPPayload struct {
 
 // NewHTTP returns a new HTTPPayload struct, based on the passed
 // in http.Request and http.Response objects.
-func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
+func NewHTTP(req *http.Request, res *http.Response) HTTPPayload {
 	if req == nil {
 		req = &http.Request{}
 	}
@@ -110,7 +109,7 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 		res = &http.Response{}
 	}
 
-	sdreq := &HTTPPayload{
+	sdreq := HTTPPayload{
 		RequestMethod: req.Method,
 		Status:        res.StatusCode,
 		UserAgent:     req.UserAgent(),
@@ -134,9 +133,8 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 		}
 	}
 
-	buf := &bytes.Buffer{}
 	if req.Body != nil {
-		n, _ := io.Copy(buf, req.Body) // nolint: gas
+		n, _ := io.Copy(io.Discard, req.Body) // nolint: gas
 		requestSize += n
 	}
 
@@ -153,8 +151,7 @@ func NewHTTP(req *http.Request, res *http.Response) *HTTPPayload {
 	}
 
 	if res.Body != nil {
-		buf.Reset()
-		n, _ := io.Copy(buf, res.Body) // nolint: gas
+		n, _ := io.Copy(io.Discard, res.Body) // nolint: gas
 		responseSize += n
 	}
 
