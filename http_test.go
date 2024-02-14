@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"go.ajitem.com/zapdriver"
+	"github.com/h6ah4i/zapdriver"
 )
 
 func BenchmarkHTTP(b *testing.B) {
