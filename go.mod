@@ -1,4 +1,4 @@
-module go.ajitem.com/zapdriver
+module github.com/h6ah4i/zapdriver
 
 go 1.17
 
